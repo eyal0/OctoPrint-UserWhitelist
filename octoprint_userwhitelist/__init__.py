@@ -1,27 +1,48 @@
 # coding=utf-8
 from __future__ import absolute_import
 
+import re
+
 import octoprint.plugin
+import os.path
 
 class UserWhitelistPlugin(octoprint.plugin.SettingsPlugin,
                           octoprint.plugin.TemplatePlugin,
                           octoprint.plugin.StartupPlugin):
   def _whitelisting_add_file(self, destination, path, file_object,
                             links=None, allow_overwrite=False, printer_profile=None, analysis=None):
-    print self._settings
-    print dir(self._settings.settings)
+    usernames = self._settings.get(["usernames"])
+    if not isinstance(usernames, str):
+      return self._old_add_file(destination, path, file_object, links, allow_overwrite, printer_profile, analysis)
+    username_list = re.split("[^a-zA-Z0-9]+", usernames)
+    m = re.search("^[^a-zA-Z0-9]*([a-zA-Z0-9]+)[^a-zA-Z0-9]", os.path.splitext(file_object.filename)[0])
+    if m and m.group(1) in username_list:
+      return self._old_add_file(destination, path, file_object, links, allow_overwrite, printer_profile, analysis)
+    if m:
+      file_object.filename += (
+        r''' because "''' +
+        m.group(1) +
+        r'''" is not on the username whitelist.  ''' +
+        r'''<script type="text/javascript">alert("Whitelist failed, add \"''' +
+        m.group(1) +
+        r'''\" to Settings->User Whitelist");</script>Add "''' +
+        m.group(1) +
+        r'''" to Settings->User Whitelist''')
+      raise octoprint.filemanager.storage.StorageError(
+        "Invalid username, failed whitelist",
+        code=octoprint.filemanager.storage.StorageError.UNKNOWN)
+
     file_object.filename += (
-      r"""" because it doesn't start with a whitelisted LDAP followed by an underscore.  """ +
-      r"""<script type="text/javascript">alert("Whitelist failed, rename your file to \"YOURLDAP_""" +
+      r''' because it doesn't start with a whitelisted username followed by an underscore.  ''' +
+      r'''<script type="text/javascript">alert("Whitelist failed, rename your file to \"YOURUSERNAME_''' +
       file_object.filename +
-      r"""\"");</script>Please rename your file to "YOURLDAP_""" +
+      r'''\"");</script>Rename your file to "YOURUSERNAME_''' +
       file_object.filename)
     raise octoprint.filemanager.storage.StorageError(
-      "Invalid LDAP, failed whitelist",
+      "Invalid username, failed whitelist",
       code=octoprint.filemanager.storage.StorageError.UNKNOWN)
 
   def on_after_startup(self):
-    print self._settings.get()
     self._old_add_file = self._file_manager.add_file
     self._file_manager.add_file = self._whitelisting_add_file
 
