@@ -55,7 +55,7 @@ class UserWhitelistPlugin(octoprint.plugin.SettingsPlugin,
 
   def get_settings_defaults(self):
     return dict(
-      usernames=[]
+      usernames=""
     )
 
   ##~~ Softwareupdate hook
