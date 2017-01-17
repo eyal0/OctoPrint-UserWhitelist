@@ -7,15 +7,12 @@ description: Allow uploads based on username in file.
 author: Eyal Soha
 license: AGPLv3
 
-# TODO
-date: today's date in format YYYY-MM-DD, e.g. 2015-04-21
+date: 2017-01-17
 
 homepage: https://github.com/eyal0/OctoPrint-UserWhitelist
 source: https://github.com/eyal0/OctoPrint-UserWhitelist
 archive: https://github.com/eyal0/OctoPrint-UserWhitelist/archive/master.zip
 
-# TODO set this to true if your plugin uses the dependency_links setup parameter to include
-# library versions not yet published on PyPi. SHOULD ONLY BE USED IF THERE IS NO OTHER OPTION!
 follow_dependency_links: false
 
 # TODO
