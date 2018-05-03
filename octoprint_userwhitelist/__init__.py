@@ -10,14 +10,14 @@ class UserWhitelistPlugin(octoprint.plugin.SettingsPlugin,
                           octoprint.plugin.TemplatePlugin,
                           octoprint.plugin.StartupPlugin):
   def _whitelisting_add_file(self, destination, path, file_object,
-                            links=None, allow_overwrite=False, printer_profile=None, analysis=None):
+                             **kwargs):
     usernames = self._settings.get(["usernames"])
     if not isinstance(usernames, str):
-      return self._old_add_file(destination, path, file_object, links, allow_overwrite, printer_profile, analysis)
+      return self._old_add_file(destination, path, file_object, **kwargs)
     username_list = re.split("[^a-zA-Z0-9]+", usernames)
     m = re.search("^[^a-zA-Z0-9]*([a-zA-Z0-9]+)[^a-zA-Z0-9]", os.path.splitext(file_object.filename)[0])
     if m and m.group(1) in username_list:
-      return self._old_add_file(destination, path, file_object, links, allow_overwrite, printer_profile, analysis)
+      return self._old_add_file(destination, path, file_object, **kwargs)
     if m:
       file_object.filename += (
         r''' because "''' +
